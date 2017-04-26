@@ -1,24 +1,3 @@
 ---
-- name: Firewalld is running thru restarts
-  service:
-    name: firewalld
-    enabled: yes
-    state: started
-
-- name: Firewalld accepts these services
-  firewalld:
-    service: '{{ item }}'
-    state: enabled
-    permanent: yes
-  with_items: '{{ open_service }}'
-  when: open_service is defined
-  notify: restart firewall
-
-- name: Firewalld accepts these ports
-  firewalld:
-    port: '{{ item }}'
-    state: enabled
-    permanent: yes
-  with_items: '{{ open_port }}'
-  when: open_port is defined
-  notify: restart firewall
+- name: Including playbook based on OS
+  include: firewall-{{ ansible_os_family }}.yml
