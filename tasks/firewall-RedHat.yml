@@ -1,28 +1,43 @@
-- name: Firewalld is installed
-  yum:
-    name: firewalld
-    state: latest
+- name: Centos 7 only block
+  block:
 
-- name: Firewalld is running thru restarts
-  service:
-    name: firewalld
-    enabled: yes
-    state: started
+  - name: Firewalld is installed
+    yum:
+      name: firewalld
+      state: present
 
-- name: Firewalld accepts these services
-  firewalld:
-    service: '{{ item }}'
-    state: enabled
-    permanent: yes
-  with_items: '{{ open_service }}'
-  when: open_service is defined
-  notify: restart firewall
+  - name: Firewalld is running thru restarts
+    service:
+      name: firewalld
+      enabled: yes
+      state: started
 
-- name: Firewalld accepts these ports
-  firewalld:
-    port: '{{ item }}'
-    state: enabled
-    permanent: yes
-  with_items: '{{ open_port }}'
-  when: open_port is defined
-  notify: restart firewall
+  - name: Firewalld accepts these services
+    firewalld:
+      service: '{{ item }}'
+      state: enabled
+      permanent: yes
+    with_items: '{{ open_service }}'
+    when: open_service is defined
+    notify: restart firewall
+
+  - name: Firewalld accepts these ports
+    firewalld:
+      port: '{{ item }}'
+      state: enabled
+      permanent: yes
+    with_items: '{{ open_port }}'
+    when: open_port is defined
+    notify: restart firewall
+
+  when: ansible_distribution_major_version == '7'
+
+- name: Centos 6 only block
+  block:
+
+  - name: System Firewall Config is installed
+    package:
+      name: system-config-firewall-tui, system-config-firewall
+      state: absent
+
+  when: ansible_distribution_major_version == '6'
